@@ -1,0 +1,38 @@
+---
+lowercaseOutputName: true
+lowercaseOutputLabelNames: true
+whitelistObjectNames: ["org.apache.activemq:destinationType=Topic,*","org.apache.activemq:destinationType=Queue,*"]
+blacklistObjectNames: ["jvm:*", "java.lang:*","com.sun.management:*","java.nio:*","java.util.logging:*","jmx4perl:*", "jolokia:*","JMImplementation:*", "io.fabric8.insight:*"]
+rules:
+  - pattern: "org.apache.activemq<type=Broker, brokerName=([^\"]*), destinationType=([^\"]*), destinationName=([^\"]*)><>QueueSize"
+    name: org_apache_activemq_broker_queuesize
+    help: Number of messages on this destination, including any that have been dispatched but not acknowledged
+    type: GAUGE
+    labels:
+        brokerName: $1
+        destinationType: $2
+        destinationName: $3
+  - pattern: "org.apache.activemq<type=Broker, brokerName=([^\"]*), destinationType=([^\"]*), destinationName=([^\"]*)><>ConsumerCount"
+    name: org_apache_activemq_broker_consumercount
+    help: Number of consumers subscribed to this destination.
+    type: GAUGE
+    labels:
+        brokerName: $1
+        destinationType: $2
+        destinationName: $3
+  - pattern: "org.apache.activemq<type=Broker, brokerName=([^\"]*), destinationType=([^\"]*), destinationName=([^\"]*)><>DequeueCount"
+    name: org_apache_activemq_broker_dequeuecount
+    help: Number of dequeued messages
+    type: COUNTER
+    labels:
+        brokerName: $1
+        destinationType: $2
+        destinationName: $3
+  - pattern: "org.apache.activemq<type=Broker, brokerName=([^\"]*), destinationType=([^\"]*), destinationName=([^\"]*)><>EnqueueCount"
+    name: org_apache_activemq_broker_enqueuecount
+    help: Number of enqueued messages
+    type: COUNTER
+    labels:
+        brokerName: $1
+        destinationType: $2
+        destinationName: $3        

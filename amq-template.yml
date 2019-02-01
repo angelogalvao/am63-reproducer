@@ -1,0 +1,242 @@
+apiVersion: v1
+kind: Template
+labels:
+  template: amg63
+  xpaas: 1.3.1
+metadata:
+  annotations:
+    description: Application template for JBoss A-MQ brokers. These can be deployed as standalone and use persistent storage for saving messages.
+    iconClass: icon-jboss
+    tags: messaging,amq,jboss,xpaas
+    version: 1.3.1
+  name: amg63
+objects:
+- apiVersion: v1
+  kind: ImageStream
+  metadata:
+    labels:
+      build: openshift-amq
+    name: amq63-openshift
+  spec:
+    lookupPolicy:
+      local: false
+    tags:
+    - annotations:
+        openshift.io/imported-from: registry.access.redhat.com/jboss-amq-6/amq63-openshift:latest
+      importPolicy: {}
+      name: "latest"
+      referencePolicy:
+        type: Source
+- apiVersion: v1
+  kind: ImageStream
+  metadata:
+    labels:
+      build: amg63
+    name: amg63
+  spec:
+    lookupPolicy:
+      local: false
+- apiVersion: v1
+  kind: BuildConfig
+  metadata:
+    labels:
+      app: amg63
+      build: amg63
+      template: amg63
+      xpaas: 1.3.1
+    name: amg63
+  spec:
+    failedBuildsHistoryLimit: 5
+    output:
+      to:
+        kind: ImageStreamTag
+        name: amg63:latest
+    runPolicy: Serial
+    source:
+      git:
+        uri: ${GIT_URI}
+      type: Git
+    strategy:
+      sourceStrategy:
+        from:
+          kind: ImageStreamTag
+          name: jboss-amq-63:latest
+          namespace: openshift
+      type: Source
+    successfulBuildsHistoryLimit: 5
+    triggers:
+    - imageChange: {}
+      type: ImageChange
+    - type: ConfigChange
+- apiVersion: v1
+  kind: Service
+  metadata:
+    annotations:
+      description: The broker's OpenWire port.
+    labels:
+      project: broker
+      app: amg63
+    name: broker-amq-tcp
+  spec:
+    ports:
+    - name: tcp
+      port: 61616
+      targetPort: 61616
+    - name: tcpssl
+      port: 61617
+      targetPort: 61617
+    - name: prometheus-exporter
+      port: 9779
+      targetPort: 9779
+    selector:
+      project: broker
+- apiVersion: v1
+  kind: DeploymentConfig
+  metadata:
+    labels:
+      project: broker
+      app: amg63
+    name: ${APPLICATION_NAME}-amq
+  spec:
+    replicas: 1
+    selector:
+      project: broker
+    strategy:
+      type: Recreate
+    template:
+      metadata:
+        labels:
+          project: broker
+        name: ${APPLICATION_NAME}-amq
+      spec:
+        containers:
+        - env:
+          - name: ACTIVEMQ_OPTS
+            value: ' -javaagent:/opt/amq/conf/jmx_prometheus_javaagent-0.3.1.jar=9779:/opt/amq/conf/prometheus_javaagent.yml'
+          - name: AMQ_USER
+            value: ${MQ_USERNAME}
+          - name: AMQ_PASSWORD
+            value: ${MQ_PASSWORD}
+          - name: AMQ_TRANSPORTS
+            value: ${MQ_PROTOCOL}
+          - name: AMQ_QUEUES
+            value: ${MQ_QUEUES}
+          - name: AMQ_TOPICS
+            value: ${MQ_TOPICS}
+          - name: MQ_SERIALIZABLE_PACKAGES
+            value: ${MQ_SERIALIZABLE_PACKAGES}
+          - name: AMQ_SPLIT
+            value: "FALSE"
+          - name: AMQ_MESH_DISCOVERY_TYPE
+            value: kube
+          - name: AMQ_MESH_SERVICE_NAME
+            value: ${APPLICATION_NAME}-amq-tcp
+          - name: AMQ_MESH_SERVICE_NAMESPACE
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.namespace
+          - name: AMQ_STORAGE_USAGE_LIMIT
+            value: ${AMQ_STORAGE_USAGE_LIMIT}
+          - name: AMQ_TEMP_USAGE_LIMIT
+            value: ${AMQ_TEMP_USAGE_LIMIT}
+          image: amg63:latest
+          imagePullPolicy: Always
+          name: ${APPLICATION_NAME}-amq
+          ports:
+          - containerPort: 8778
+            name: jolokia
+            protocol: TCP
+          - containerPort: 61616
+            name: tcp
+            protocol: TCP
+          - containerPort: 61617
+            name: amqp-ssl
+            protocol: TCP
+          - containerPort: 9779
+            name: jmx-exporter
+            protocol: TCP
+          readinessProbe:
+            exec:
+              command:
+              - /bin/bash
+              - -c
+              - /opt/amq/bin/readinessProbe.sh
+          volumeMounts:
+          - mountPath: /opt/amq/data
+            name: ${APPLICATION_NAME}-amq-pvol
+        terminationGracePeriodSeconds: 60
+        volumes:
+        - name: ${APPLICATION_NAME}-amq-pvol
+          persistentVolumeClaim:
+            claimName: ${APPLICATION_NAME}-amq-claim
+    triggers:
+    - imageChangeParams:
+        automatic: true
+        containerNames:
+        - ${APPLICATION_NAME}-amq
+        from:
+          kind: ImageStreamTag
+          name: amg63:latest
+      type: ImageChange
+    - type: ConfigChange
+- apiVersion: v1
+  kind: PersistentVolumeClaim
+  metadata:
+    labels:
+      application: ${APPLICATION_NAME}
+    name: ${APPLICATION_NAME}-amq-claim
+  spec:
+    accessModes:
+    - ReadWriteOnce
+    resources:
+      requests:
+        storage: ${VOLUME_CAPACITY}
+parameters:
+- description: The name for the application.
+  name: APPLICATION_NAME
+  required: true
+  value: broker
+- description: The URI for the git.
+  name: GIT_URI
+  required: true
+- description: 'Protocols to configure, separated by commas.  Allowed values are:
+    `openwire`, `amqp`, `stomp` and `mqtt`.'
+  name: MQ_PROTOCOL
+  value: openwire
+- description: Queue names, separated by commas.  These queues will be automatically
+    created when the broker starts.  If left empty, queues will be still created dynamically.
+  name: MQ_QUEUES
+- description: Topic names, separated by commas.  These topics will be automatically
+    created when the broker starts.  If left empty, topics will be still created dynamically.
+  name: MQ_TOPICS
+- description: List of packages that are allowed to be serialized for use in ObjectMessage,
+    separated by commas. If your app doesn't use ObjectMessages, leave this blank.
+    This is a security enforcement. For the rationale, see http://activemq.apache.org/objectmessage.html
+  name: MQ_SERIALIZABLE_PACKAGES
+- description: Size of persistent storage for database volume.
+  name: VOLUME_CAPACITY
+  required: true
+  value: 1Gi
+- description: User name for standard broker user.  It is required for connecting
+    to the broker.  If left empty, it will be generated.
+  from: user[a-zA-Z0-9]{3}
+  generate: expression
+  name: MQ_USERNAME
+- description: Password for standard broker user.  It is required for connecting to
+    the broker.  If left empty, it will be generated.
+  from: '[a-zA-Z0-9]{8}'
+  generate: expression
+  name: MQ_PASSWORD
+- description: The A-MQ storage usage limit
+  name: AMQ_STORAGE_USAGE_LIMIT
+  value: 1 gb
+- description: The A-MQ temp storage usage limit
+  name: AMQ_TEMP_USAGE_LIMIT
+  value: 1 gb
+- description: Namespace in which the ImageStreams for Red Hat Middleware images are
+    installed. These ImageStreams are normally installed in the openshift namespace.
+    You should only need to modify this if you've installed the ImageStreams in a
+    different namespace/project.
+  name: IMAGE_STREAM_NAMESPACE
+  required: true
+  value: openshift

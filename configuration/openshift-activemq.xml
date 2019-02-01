@@ -1,0 +1,145 @@
+<beans
+  xmlns="http://www.springframework.org/schema/beans"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+           http://activemq.apache.org/schema/core http://activemq.apache.org/schema/core/activemq-core.xsd">
+
+  <bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+    <property name="locations">
+      <value>file:${activemq.conf}/credentials.properties</value>
+    </property>
+    <property name="ignoreResourceNotFound" value="true"/>
+    <property name="searchSystemEnvironment" value="true"/>
+    <property name="systemPropertiesModeName" value="SYSTEM_PROPERTIES_MODE_OVERRIDE"/>
+  </bean>
+
+  <broker xmlns="http://activemq.apache.org/schema/core" brokerName="${HOSTNAME}" dataDirectory="${activemq.data}">
+
+    <destinations>
+      <queue physicalName="ttest.event.notifier"/>
+      <queue physicalName="gtest.event.notifier"/>
+      <topic physicalName="test.workorder"/>
+      <queue physicalName="sub.gtest.test.workorder"/>
+      <topic physicalName="vtest.promo"/>
+      <queue physicalName="sub.gpro.vtest.promo"/>
+    </destinations>
+
+    <destinationInterceptors>
+      <virtualDestinationInterceptor>
+        <virtualDestinations>
+          <virtualTopic name="test.workorder" prefix="sub.*." selectorAware="false"/>
+          <virtualTopic name="vtest.promo" prefix="sub.*." selectorAware="false"/>
+        </virtualDestinations>
+      </virtualDestinationInterceptor>
+    </destinationInterceptors>
+
+    <destinationPolicy>
+      <policyMap>
+        <policyEntries>
+
+          <policyEntry queue=">" producerFlowControl="true" memoryLimit="10mb" useCache="false">
+            <networkBridgeFilterFactory>
+              <conditionalNetworkBridgeFilterFactory replayWhenNoConsumers="true" replayDelay="500"/>
+            </networkBridgeFilterFactory>
+          </policyEntry>
+
+          <policyEntry topic=">" producerFlowControl="true">
+            <pendingMessageLimitStrategy>
+              <constantPendingMessageLimitStrategy limit="1000"/>
+            </pendingMessageLimitStrategy>
+          </policyEntry>
+
+          <policyEntry queue=">">
+            <deadLetterStrategy>
+              <individualDeadLetterStrategy queuePrefix="" queueSuffix=".DLQ" useQueueForQueueMessages="true"/>
+            </deadLetterStrategy>
+          </policyEntry>
+
+          <policyEntry topic=">">
+            <deadLetterStrategy>
+              <individualDeadLetterStrategy topicPrefix="" topicSuffix=".DLQ" useQueueForTopicMessages="true" useQueueForQueueMessages="true"/>
+            </deadLetterStrategy>
+          </policyEntry>
+        </policyEntries>
+      </policyMap>
+    </destinationPolicy>
+
+    <managementContext>
+      <managementContext createConnector="false"/>
+    </managementContext>
+
+    <persistenceAdapter>
+      <mKahaDB directory="${activemq.data}/kahadb">
+        <filteredPersistenceAdapters>
+          <filteredKahaDB queue="ActiveMQ.DLQ">
+            <persistenceAdapter>
+              <kahaDB journalMaxFileLength="32mb" enableJournalDiskSyncs="false" checkForCorruptJournalFiles="true"/>
+            </persistenceAdapter>
+          </filteredKahaDB>
+          <filteredKahaDB>
+            <persistenceAdapter>
+              <kahaDB journalMaxFileLength="16 mb" enableJournalDiskSyncs="true" checkForCorruptJournalFiles="true"/>
+            </persistenceAdapter>
+          </filteredKahaDB>
+        </filteredPersistenceAdapters>
+      </mKahaDB>
+    </persistenceAdapter>
+
+    <plugins>
+      <jaasAuthenticationPlugin configuration="activemq"/>
+      <authorizationPlugin>
+        <map>
+          <authorizationMap groupClass="org.apache.activemq.jaas.UserPrincipal">
+            <authorizationEntries>
+              <authorizationEntry
+                topic="ActiveMQ.Advisory.>"
+                read="test-consumer,test-publiser,test-notifier,g-test-consumer,v-test-publisher"
+                write="test-consumer,test-publiser,test-notifier,g-test-consumer,v-test-publisher"
+                admin="test-consumer,test-publiser,test-notifier,g-test-consumer,v-test-publisher"/>
+
+              <authorizationEntry queue="gtest.>" read="test-consumer" write="test-publiser"/>
+              <authorizationEntry topic="scheduall.>" write="test-notifier"/>
+              <authorizationEntry queue="sub.*.scheduall.>" read="test-publiser"/>
+
+              <authorizationEntry topic="vtest.>" write="v-test-publisher"/>
+              <authorizationEntry queue="sub.*.vtest.>" read="g-test-consumer"/>
+
+            </authorizationEntries>
+          </authorizationMap>
+        </map>
+      </authorizationPlugin>
+    </plugins>
+
+    <systemUsage>
+      <systemUsage>
+        <memoryUsage>
+          <memoryUsage percentOfJvmHeap="70"/>
+        </memoryUsage>
+        <storeUsage>
+          <storeUsage limit="${AMQ_STORAGE_USAGE_LIMIT}"/>
+        </storeUsage>
+        <tempUsage>
+          <tempUsage limit="${AMQ_TEMP_USAGE_LIMIT}"/>
+        </tempUsage>
+      </systemUsage>
+    </systemUsage>
+
+    <transportConnectors>
+      <transportConnector name="openwire" uri="tcp://0.0.0.0:61616?maximumConnections=2500&amp;wireFormat.maxFrameSize=104857600"/>
+      <transportConnector name="amqp+ssl" uri="amqp+ssl://0.0.0.0:61617"/>
+    </transportConnectors>
+
+    <sslContext>
+      <sslContext keyStore="file:${AMQ_HOME}/conf/amq-server.ks" keyStorePassword="passwd" trustStore="file:${AMQ_HOME}/conf/amq-server.ts" trustStorePassword="passwd"/>
+    </sslContext>
+
+    <!-- destroy the spring context on shutdown to stop jetty -->
+    <shutdownHooks>
+      <bean xmlns="http://www.springframework.org/schema/beans" class="org.apache.activemq.hooks.SpringContextHook"/>
+    </shutdownHooks>
+
+  </broker>
+
+  <!-- ##### DATASOURCE_BEAN ##### -->
+
+</beans>
