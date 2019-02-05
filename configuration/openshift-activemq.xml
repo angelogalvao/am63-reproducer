@@ -23,6 +23,7 @@
       <topic physicalName="vtest.promo"/>
       <queue physicalName="sub.gpro.vtest.promo"/>
       <queue physicalName="adding.testing"/>
+      <queue physicalName="adding.another.testing"/>
     </destinations>
 
     <destinationInterceptors>
