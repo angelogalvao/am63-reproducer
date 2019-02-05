@@ -21,7 +21,7 @@
       <queue physicalName="sub.gtest.test.workorder"/>
 
       <queue physicalName="another.queue"/>
-      <queue physicalName="yet.another.queue"/>>
+      <queue physicalName="yet.another.queue"/>
     </destinations>
 
     <destinationInterceptors>
