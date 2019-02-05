@@ -15,22 +15,16 @@
 
   <broker xmlns="http://activemq.apache.org/schema/core" brokerName="${HOSTNAME}" dataDirectory="${activemq.data}">
 
-    <destinations>
-      <queue physicalName="ttest.event.notifier"/>
+    <destinations> 
       <queue physicalName="gtest.event.notifier"/>
       <topic physicalName="test.workorder"/>
       <queue physicalName="sub.gtest.test.workorder"/>
-      <topic physicalName="vtest.promo"/>
-      <queue physicalName="sub.gpro.vtest.promo"/>
-      <queue physicalName="adding.testing"/>
-      <queue physicalName="adding.another.testing"/>
     </destinations>
 
     <destinationInterceptors>
       <virtualDestinationInterceptor>
         <virtualDestinations>
           <virtualTopic name="test.workorder" prefix="sub.*." selectorAware="false"/>
-          <virtualTopic name="vtest.promo" prefix="sub.*." selectorAware="false"/>
         </virtualDestinations>
       </virtualDestinationInterceptor>
     </destinationInterceptors>
@@ -62,6 +56,7 @@
               <individualDeadLetterStrategy topicPrefix="" topicSuffix=".DLQ" useQueueForTopicMessages="true" useQueueForQueueMessages="true"/>
             </deadLetterStrategy>
           </policyEntry>
+
         </policyEntries>
       </policyMap>
     </destinationPolicy>
@@ -93,18 +88,9 @@
         <map>
           <authorizationMap groupClass="org.apache.activemq.jaas.UserPrincipal">
             <authorizationEntries>
-              <authorizationEntry
-                topic="ActiveMQ.Advisory.>"
-                read="test-consumer,test-publisher,test-notifier,g-test-consumer,v-test-publisher"
-                write="test-consumer,test-publisher,test-notifier,g-test-consumer,v-test-publisher"
-                admin="test-consumer,test-publisher,test-notifier,g-test-consumer,v-test-publisher"/>
+              <authorizationEntry  topic="ActiveMQ.Advisory.>"  read="test-consumer,test-publisher" write="test-consumer,test-publisher" admin="test-consumer,test-publisher"/>
 
               <authorizationEntry queue="gtest.>" read="test-consumer" write="test-publisher"/>
-              <authorizationEntry topic="scheduall.>" write="test-notifier"/>
-              <authorizationEntry queue="sub.*.scheduall.>" read="test-publisher"/>
-
-              <authorizationEntry topic="vtest.>" write="v-test-publisher"/>
-              <authorizationEntry queue="sub.*.vtest.>" read="g-test-consumer"/>
 
               <authorizationEntry topic="test.workorder" write="test-publisher"/>
               <authorizationEntry queue="sub.*.test.>" read="test-consumer"/>
