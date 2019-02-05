@@ -60,8 +60,7 @@ objects:
       sourceStrategy:
         from:
           kind: ImageStreamTag
-          name: jboss-amq-63:latest
-          namespace: openshift
+          name: amq63-openshift:latest
       type: Source
     successfulBuildsHistoryLimit: 5
     triggers:

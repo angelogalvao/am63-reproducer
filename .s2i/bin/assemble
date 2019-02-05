@@ -1,5 +1,4 @@
 #!/bin/sh
-
 SRCCONF=/tmp/src/configuration
 SRCLIB=/tmp/src/lib
 SRCBIN=/tmp/src
