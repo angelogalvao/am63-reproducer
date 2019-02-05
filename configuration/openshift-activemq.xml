@@ -95,13 +95,13 @@
             <authorizationEntries>
               <authorizationEntry
                 topic="ActiveMQ.Advisory.>"
-                read="test-consumer,test-publiser,test-notifier,g-test-consumer,v-test-publisher"
-                write="test-consumer,test-publiser,test-notifier,g-test-consumer,v-test-publisher"
-                admin="test-consumer,test-publiser,test-notifier,g-test-consumer,v-test-publisher"/>
+                read="test-consumer,test-publisher,test-notifier,g-test-consumer,v-test-publisher"
+                write="test-consumer,test-publisher,test-notifier,g-test-consumer,v-test-publisher"
+                admin="test-consumer,test-publisher,test-notifier,g-test-consumer,v-test-publisher"/>
 
-              <authorizationEntry queue="gtest.>" read="test-consumer" write="test-publiser"/>
+              <authorizationEntry queue="gtest.>" read="test-consumer" write="test-publisher"/>
               <authorizationEntry topic="scheduall.>" write="test-notifier"/>
-              <authorizationEntry queue="sub.*.scheduall.>" read="test-publiser"/>
+              <authorizationEntry queue="sub.*.scheduall.>" read="test-publisher"/>
 
               <authorizationEntry topic="vtest.>" write="v-test-publisher"/>
               <authorizationEntry queue="sub.*.vtest.>" read="g-test-consumer"/>
