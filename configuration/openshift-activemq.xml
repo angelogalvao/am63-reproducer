@@ -106,6 +106,9 @@
               <authorizationEntry topic="vtest.>" write="v-test-publisher"/>
               <authorizationEntry queue="sub.*.vtest.>" read="g-test-consumer"/>
 
+              <authorizationEntry topic="test.workorder" write="test-publisher"/>
+              <authorizationEntry queue="sub.*.test.>" read="test-consumer"/>
+
             </authorizationEntries>
           </authorizationMap>
         </map>
