@@ -1,13 +1,16 @@
 # Reproducer
 
+From a clean state(fresh disk)
 
-from a clean state(fresh disk)
+1- Post messages to the topic test-worker
+2- Consume and reject messages from queue sub.gtest.test.workorder
+3- Messages should go to the right wrong dead letter queue (ActiveMQ.DLQ)
 
-1- post messages to queue
-2- consume and reject messages
-3- messages should go to the right deadletter
-
-3- Add new queue
+4- Modify openshift-activemq.xml by adding a new queue
+5- Push this change to the git repository (you need to clone this repo for this)
+6- Build a new Image
+7- Redo steps 1 & 2
+8- Now messages should go to the right queue sub.gtest.test.workorder.DLQ
 
 
 # Create Project 
