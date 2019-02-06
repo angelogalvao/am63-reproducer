@@ -1,99 +1,45 @@
-<beans
-  xmlns="http://www.springframework.org/schema/beans"
-  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
-           http://activemq.apache.org/schema/core http://activemq.apache.org/schema/core/activemq-core.xsd">
+ <broker xmlns="http://activemq.apache.org/schema/core" brokerName="${HOSTNAME}" dataDirectory="${activemq.data}">
 
-  <bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
-    <property name="locations">
-      <value>file:${activemq.conf}/credentials.properties</value>
-    </property>
-    <property name="ignoreResourceNotFound" value="true"/>
-    <property name="searchSystemEnvironment" value="true"/>
-    <property name="systemPropertiesModeName" value="SYSTEM_PROPERTIES_MODE_OVERRIDE"/>
-  </bean>
-
-  <broker xmlns="http://activemq.apache.org/schema/core" brokerName="${HOSTNAME}" dataDirectory="${activemq.data}">
-
-    <destinations> 
+    <destinations>
+      <queue physicalName="ttest.event.notifier"/>
       <queue physicalName="gtest.event.notifier"/>
       <topic physicalName="test.workorder"/>
       <queue physicalName="sub.gtest.test.workorder"/>
-
-      <queue physicalName="another.queue"/>     
-      <queue physicalName="yet.another.queue"/>
+      <topic physicalName="vtest.promo"/>
+      <queue physicalName="sub.gpro.vtest.promo"/>
+      <queue physicalName="adding.testing"/>
+      <queue physicalName="adding.another.testing"/>
     </destinations>
 
     <destinationInterceptors>
       <virtualDestinationInterceptor>
         <virtualDestinations>
           <virtualTopic name="test.workorder" prefix="sub.*." selectorAware="false"/>
+          <virtualTopic name="vtest.promo" prefix="sub.*." selectorAware="false"/>
         </virtualDestinations>
       </virtualDestinationInterceptor>
     </destinationInterceptors>
-
-    <destinationPolicy>
-      <policyMap>
-        <policyEntries>
-
-          <policyEntry queue=">" producerFlowControl="true" memoryLimit="10mb" useCache="false">
-            <networkBridgeFilterFactory>
-              <conditionalNetworkBridgeFilterFactory replayWhenNoConsumers="true" replayDelay="500"/>
-            </networkBridgeFilterFactory>
-          </policyEntry>
-
-          <policyEntry topic=">" producerFlowControl="true">
-            <pendingMessageLimitStrategy>
-              <constantPendingMessageLimitStrategy limit="1000"/>
-            </pendingMessageLimitStrategy>
-          </policyEntry>
-
-          <policyEntry queue=">">
-            <deadLetterStrategy>
-              <individualDeadLetterStrategy queuePrefix="" queueSuffix=".DLQ" useQueueForQueueMessages="true"/>
-            </deadLetterStrategy>
-          </policyEntry>
-
-          <policyEntry topic=">">
-            <deadLetterStrategy>
               <individualDeadLetterStrategy topicPrefix="" topicSuffix=".DLQ" useQueueForTopicMessages="true" useQueueForQueueMessages="true"/>
             </deadLetterStrategy>
           </policyEntry>
-
         </policyEntries>
       </policyMap>
     </destinationPolicy>
-
-    <managementContext>
-      <managementContext createConnector="false"/>
-    </managementContext>
-
-    <persistenceAdapter>
-      <mKahaDB directory="${activemq.data}/kahadb">
-        <filteredPersistenceAdapters>
-          <filteredKahaDB queue="ActiveMQ.DLQ">
-            <persistenceAdapter>
-              <kahaDB journalMaxFileLength="32mb" enableJournalDiskSyncs="false" checkForCorruptJournalFiles="true"/>
-            </persistenceAdapter>
-          </filteredKahaDB>
-          <filteredKahaDB>
-            <persistenceAdapter>
-              <kahaDB journalMaxFileLength="16 mb" enableJournalDiskSyncs="true" checkForCorruptJournalFiles="true"/>
-            </persistenceAdapter>
-          </filteredKahaDB>
-        </filteredPersistenceAdapters>
-      </mKahaDB>
-    </persistenceAdapter>
-
-    <plugins>
-      <jaasAuthenticationPlugin configuration="activemq"/>
-      <authorizationPlugin>
         <map>
           <authorizationMap groupClass="org.apache.activemq.jaas.UserPrincipal">
             <authorizationEntries>
-              <authorizationEntry  topic="ActiveMQ.Advisory.>"  read="test-consumer,test-publisher" write="test-consumer,test-publisher" admin="test-consumer,test-publisher"/>
+              <authorizationEntry
+                topic="ActiveMQ.Advisory.>"
+                read="test-consumer,test-publisher,test-notifier,g-test-consumer,v-test-publisher"
+                write="test-consumer,test-publisher,test-notifier,g-test-consumer,v-test-publisher"
+                admin="test-consumer,test-publisher,test-notifier,g-test-consumer,v-test-publisher"/>
 
               <authorizationEntry queue="gtest.>" read="test-consumer" write="test-publisher"/>
+              <authorizationEntry topic="scheduall.>" write="test-notifier"/>
+              <authorizationEntry queue="sub.*.scheduall.>" read="test-publisher"/>
+
+              <authorizationEntry topic="vtest.>" write="v-test-publisher"/>
+              <authorizationEntry queue="sub.*.vtest.>" read="g-test-consumer"/>
 
               <authorizationEntry topic="test.workorder" write="test-publisher"/>
               <authorizationEntry queue="sub.*.test.>" read="test-consumer"/>
