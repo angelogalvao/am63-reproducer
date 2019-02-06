@@ -1,6 +1,5 @@
 # Reproducer
 
---- Working in Progress ----
 
 from a clean state(fresh disk)
 
@@ -11,5 +10,9 @@ from a clean state(fresh disk)
 3- Add new queue
 
 
+# Create Project 
+oc new-app --template=amq63 --param=GIT_URI=https://gitlab.com/openshift-samples/amq63.git
+
 # Clean everything to test again
 oc delete all -l template=amq63 && oc delete pvc broker-amq-claim
+
