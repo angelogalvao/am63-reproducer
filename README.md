@@ -19,3 +19,5 @@ oc new-app --template=amq63 --param=GIT_URI=https://gitlab.com/openshift-samples
 # Clean everything to test again
 oc delete all -l template=amq63 && oc delete pvc broker-amq-claim
 
+# Import AMQ Image 
+ oc import-image registry.access.redhat.com/jboss-amq-6/amq63-openshift:latest --confirm
