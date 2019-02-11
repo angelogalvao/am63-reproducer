@@ -60,7 +60,7 @@ objects:
       sourceStrategy:
         from:
           kind: ImageStreamTag
-          name: amq63:latest
+          name: amq63-openshift:latest
       type: Source
     successfulBuildsHistoryLimit: 5
     triggers:
@@ -138,7 +138,7 @@ objects:
             value: ${AMQ_STORAGE_USAGE_LIMIT}
           - name: AMQ_TEMP_USAGE_LIMIT
             value: ${AMQ_TEMP_USAGE_LIMIT}
-          image: docker-registry.default.svc:5000/reproducer/amq63:latest
+          image: amq63:latest
           imagePullPolicy: Always
           name: ${APPLICATION_NAME}-amq
           ports:
