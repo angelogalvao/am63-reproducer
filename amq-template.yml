@@ -60,7 +60,7 @@ objects:
       sourceStrategy:
         from:
           kind: ImageStreamTag
-          name: amq63-openshift:latest
+          name: amq63:latest
       type: Source
     successfulBuildsHistoryLimit: 5
     triggers:
