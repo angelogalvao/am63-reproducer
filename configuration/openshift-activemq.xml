@@ -24,7 +24,7 @@
     <destinationInterceptors>
       <virtualDestinationInterceptor>
         <virtualDestinations>
-          <virtualTopic name="test.workorder" prefix="sub.gtest.*." selectorAware="false"/>
+          <virtualTopic name="test.workorder" prefix="sub.*." selectorAware="false"/>
         </virtualDestinations>
       </virtualDestinationInterceptor>
     </destinationInterceptors>
