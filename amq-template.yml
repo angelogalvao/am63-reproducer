@@ -22,7 +22,7 @@ objects:
       local: false
     tags:
     - annotations:
-        openshift.io/imported-from: registry.access.redhat.com/jboss-amq-6/amq63-openshift:latest
+        openshift.io/imported-from: docker-registry.default.svc:5000/reproducer/amq63-openshift:latest
       importPolicy: {}
       name: "latest"
       referencePolicy:
