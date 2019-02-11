@@ -17,6 +17,7 @@
 
     <destinations> 
       <queue physicalName="gtest.event.notifier"/>
+      <queue physicalName="TEST1"/>
       <topic physicalName="test.workorder"/>
       <queue physicalName="sub.gtest.test.workorder"/>
     </destinations>
