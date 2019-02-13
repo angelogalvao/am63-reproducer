@@ -38,24 +38,15 @@
             <networkBridgeFilterFactory>
               <conditionalNetworkBridgeFilterFactory replayWhenNoConsumers="true" replayDelay="500"/>
             </networkBridgeFilterFactory>
+            <deadLetterStrategy>
+              <individualDeadLetterStrategy queuePrefix="" queueSuffix=".DLQ" useQueueForQueueMessages="true"/>
+            </deadLetterStrategy>
           </policyEntry>
 
           <policyEntry topic=">" producerFlowControl="true">
             <pendingMessageLimitStrategy>
               <constantPendingMessageLimitStrategy limit="1000"/>
             </pendingMessageLimitStrategy>
-          </policyEntry>
-
-          <policyEntry queue=">">
-            <deadLetterStrategy>
-              <individualDeadLetterStrategy queuePrefix="" queueSuffix=".DLQ" useQueueForQueueMessages="true"/>
-            </deadLetterStrategy>
-          </policyEntry>
-
-          <policyEntry topic=">">
-            <deadLetterStrategy>
-              <individualDeadLetterStrategy topicPrefix="" topicSuffix=".DLQ" useQueueForTopicMessages="true" useQueueForQueueMessages="true"/>
-            </deadLetterStrategy>
           </policyEntry>
 
         </policyEntries>
