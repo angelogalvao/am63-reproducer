@@ -91,12 +91,12 @@
         <map>
           <authorizationMap groupClass="org.apache.activemq.jaas.UserPrincipal">
             <authorizationEntries>
-              <authorizationEntry  topic="ActiveMQ.Advisory.>"  read="test-consumer,test-publisher" write="test-consumer,test-publisher" admin="test-consumer,test-publisher"/>
+              <authorizationEntry  topic="ActiveMQ.Advisory.>"  read="test-consumer,test-publisher,admin" write="test-consumer,test-publisher,admin" admin="test-consumer,test-publisher,admin"/>
 
-              <authorizationEntry queue="gtest.>" read="test-consumer" write="test-publisher"/>
+              <authorizationEntry queue="gtest.>" read="test-consumer,admin" write="test-publisher,admin"/>
 
-              <authorizationEntry topic="test.workorder" write="test-publisher"/>
-              <authorizationEntry queue="sub.*.test.>" read="test-consumer"/>
+              <authorizationEntry topic="test.workorder" write="test-publisher,admin"/>
+              <authorizationEntry queue="sub.*.test.>" read="test-consumer,admin"/>
 
             </authorizationEntries>
           </authorizationMap>
