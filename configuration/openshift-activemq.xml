@@ -18,6 +18,7 @@
     <destinations> 
       <queue physicalName="TEST4"/>
       <queue physicalName="TEST5"/>
+      <queue physicalName="TEST6"/>
       <topic physicalName="test.workorder"/>
       <queue physicalName="sub.gtest.test.workorder"/>
     </destinations>
