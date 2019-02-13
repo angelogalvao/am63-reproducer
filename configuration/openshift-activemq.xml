@@ -16,10 +16,7 @@
   <broker xmlns="http://activemq.apache.org/schema/core" brokerName="${HOSTNAME}" dataDirectory="${activemq.data}">
 
     <destinations> 
-      <queue physicalName="gtest.event.notifier"/>
-      <queue physicalName="TEST1"/>
-      <queue physicalName="TEST2"/>
-       <queue physicalName="TEST3"/>
+      <queue physicalName="TEST4"/>
       <topic physicalName="test.workorder"/>
       <queue physicalName="sub.gtest.test.workorder"/>
     </destinations>
